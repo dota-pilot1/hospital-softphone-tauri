@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import type { MouseEvent } from "react";
 import { Headset, LogOut, Radio } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { tokenStorage } from "@/shared/api/tokenStorage";
 import { useAppUpdate } from "@/shared/tauri/useAppUpdate";
+import { WindowControls } from "@/shared/ui/WindowControls";
 import { Login } from "@/auth/Login";
 import { SoftphoneConsole } from "@/features/softphone/SoftphoneConsole";
 import { ConsultationMonitor } from "@/features/consultation/ConsultationMonitor";
@@ -13,6 +15,23 @@ const NAV: { id: View; label: string; icon: LucideIcon }[] = [
   { id: "softphone", label: "소프트폰", icon: Headset },
   { id: "consultation", label: "상담 관리", icon: Radio },
 ];
+
+const TITLES: Record<View, { title: string; sub: string }> = {
+  softphone: { title: "소프트폰", sub: "전화 받기·걸기 상담 콘솔" },
+  consultation: { title: "상담 관리", sub: "상담원 상태·통화 이력 모니터" },
+};
+
+function isTauri() {
+  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+}
+function startWindowDrag(e: MouseEvent<HTMLElement>) {
+  if (e.button !== 0 || e.detail > 1 || !isTauri()) return;
+  void import("@tauri-apps/api/window").then(({ getCurrentWindow }) => void getCurrentWindow().startDragging());
+}
+function toggleWindowMaximize() {
+  if (!isTauri()) return;
+  void import("@tauri-apps/api/window").then(({ getCurrentWindow }) => void getCurrentWindow().toggleMaximize());
+}
 
 export function App() {
   const [authed, setAuthed] = useState(() => Boolean(tokenStorage.getAccess()));
@@ -30,10 +49,33 @@ export function App() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Rail view={view} setView={setView} onLogout={logout} />
-      <main className="ml-[76px] min-h-screen overflow-y-auto">
-        {view === "softphone" ? <SoftphoneConsole /> : <ConsultationMonitor />}
-      </main>
+      <div className="ml-[76px] flex min-h-screen flex-col">
+        <AppHeader view={view} />
+        <main className="flex-1 overflow-y-auto">
+          {view === "softphone" ? <SoftphoneConsole /> : <ConsultationMonitor />}
+        </main>
+      </div>
     </div>
+  );
+}
+
+function AppHeader({ view }: { view: View }) {
+  const t = TITLES[view];
+  return (
+    <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between border-b border-border bg-background/95 px-5 backdrop-blur">
+      <div
+        data-tauri-drag-region
+        onMouseDown={startWindowDrag}
+        onDoubleClick={toggleWindowMaximize}
+        className="flex h-full min-w-0 flex-1 flex-col justify-center"
+      >
+        <p className="truncate text-sm font-extrabold tracking-tight">{t.title}</p>
+        <p className="truncate text-xs text-muted-foreground">Hospital Softphone · {t.sub}</p>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <WindowControls />
+      </div>
+    </header>
   );
 }
 
