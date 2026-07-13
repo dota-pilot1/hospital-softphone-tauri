@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Twilio Voice(소프트폰) 통화를 위해 WKWebView에 navigator.mediaDevices(getUserMedia)를
+       노출시키려면 마이크 사용 목적 문자열이 반드시 필요합니다. 이 값이 없으면 WebKit이
+       마이크 API를 숨겨 Device.isSupported가 false가 됩니다. -->
+  <key>NSMicrophoneUsageDescription</key>
+  <string>고객 상담 통화를 위해 마이크를 사용합니다.</string>
+</dict>
+</plist>
