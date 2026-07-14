@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { MouseEvent } from "react";
-import { Headset, LogOut, Radio } from "lucide-react";
+import { FlaskConical, Headset, LogOut, Radio } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { tokenStorage } from "@/shared/api/tokenStorage";
 import { useAppUpdate } from "@/shared/tauri/useAppUpdate";
@@ -8,17 +8,20 @@ import { WindowControls } from "@/shared/ui/WindowControls";
 import { Login } from "@/auth/Login";
 import { SoftphoneConsole } from "@/features/softphone/SoftphoneConsole";
 import { ConsultationMonitor } from "@/features/consultation/ConsultationMonitor";
+import { WebRtcLab } from "@/features/webrtc-lab/WebRtcLab";
 
-type View = "softphone" | "consultation";
+type View = "softphone" | "consultation" | "webrtc";
 
 const NAV: { id: View; label: string; icon: LucideIcon }[] = [
   { id: "softphone", label: "소프트폰", icon: Headset },
   { id: "consultation", label: "상담 관리", icon: Radio },
+  { id: "webrtc", label: "WebRTC", icon: FlaskConical },
 ];
 
 const TITLES: Record<View, { title: string; sub: string }> = {
   softphone: { title: "소프트폰", sub: "전화 받기·걸기 상담 콘솔" },
   consultation: { title: "상담 관리", sub: "상담원 상태·통화 이력 모니터" },
+  webrtc: { title: "WebRTC 실습", sub: "미디어·연결·시그널링 학습" },
 };
 
 function isTauri() {
@@ -52,7 +55,13 @@ export function App() {
       <div className="ml-[76px] flex min-h-screen flex-col">
         <AppHeader view={view} />
         <main className="flex-1 overflow-y-auto">
-          {view === "softphone" ? <SoftphoneConsole /> : <ConsultationMonitor />}
+          {view === "softphone" ? (
+            <SoftphoneConsole />
+          ) : view === "consultation" ? (
+            <ConsultationMonitor />
+          ) : (
+            <WebRtcLab />
+          )}
         </main>
       </div>
     </div>
